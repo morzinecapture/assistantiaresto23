@@ -594,7 +594,9 @@
             showTypingIndicator();
             updateConnectionStatus('Envoi en cours...', 'disconnected');
 
-            console.log('Envoi des données:', messageData);
+            console.log('=== ENVOI DES DONNÉES ===');
+            console.log('URL:', WEBHOOK_URL);
+            console.log('Données:', messageData);
 
             fetch(WEBHOOK_URL, {
                 method: 'POST',
@@ -604,43 +606,86 @@
                 body: JSON.stringify(messageData)
             })
             .then(response => {
-                console.log('Statut de la réponse:', response.status);
-                return response.text(); // Utiliser text() au lieu de json()
+                console.log('=== RÉPONSE REÇUE ===');
+                console.log('Statut:', response.status);
+                console.log('Status Text:', response.statusText);
+                console.log('Headers:', [...response.headers.entries()]);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return response.text();
             })
             .then(data => {
-                console.log('Réponse reçue:', data);
+                console.log('=== DONNÉES BRUTES ===');
+                console.log('Réponse brute:', data);
+                console.log('Type:', typeof data);
+                console.log('Longueur:', data.length);
+                console.log('Est vide:', data === '' || data.trim() === '');
+                
                 hideTypingIndicator();
                 updateConnectionStatus('Connecté', 'connected');
                 
-                // Essayer de parser la réponse en JSON
-                let responseData;
-                try {
-                    responseData = JSON.parse(data);
-                } catch (e) {
-                    console.log('Réponse n\'est pas JSON, utilisation directe:', data);
-                    responseData = { response: data };
+                // Traitement de la réponse
+                let responseMessage = '';
+                let responseData = null;
+                
+                if (data && data.trim()) {
+                    try {
+                        responseData = JSON.parse(data);
+                        console.log('=== JSON PARSÉ ===');
+                        console.log('Données JSON:', responseData);
+                        
+                        if (responseData.response) {
+                            responseMessage = responseData.response;
+                        } else if (responseData.message) {
+                            responseMessage = responseData.message;
+                        } else if (typeof responseData === 'string') {
+                            responseMessage = responseData;
+                        } else {
+                            responseMessage = JSON.stringify(responseData);
+                        }
+                    } catch (e) {
+                        console.log('=== ERREUR JSON ===');
+                        console.log('Erreur parsing:', e);
+                        responseMessage = data;
+                    }
+                } else {
+                    responseMessage = '❌ Le webhook n\'a renvoyé aucune réponse (réponse vide)';
                 }
                 
-                // Afficher la réponse de l'assistant
-                if (responseData && responseData.response) {
-                    addMessage('assistant', responseData.response);
-                } else if (responseData && typeof responseData === 'string') {
-                    addMessage('assistant', responseData);
-                } else if (data) {
-                    addMessage('assistant', data);
-                } else {
-                    addMessage('assistant', '✅ Message reçu mais pas de réponse du serveur');
-                }
+                console.log('=== MESSAGE FINAL ===');
+                console.log('Message à afficher:', responseMessage);
+                
+                // Afficher la réponse
+                addMessage('assistant', responseMessage);
                 
                 // Afficher les informations de debug
-                addDebugInfo(responseData || data);
+                addDebugInfo({
+                    url: WEBHOOK_URL,
+                    status: 'success',
+                    rawResponse: data,
+                    parsedResponse: responseData,
+                    responseLength: data.length,
+                    isEmpty: !data || data.trim() === '',
+                    finalMessage: responseMessage
+                });
             })
             .catch(error => {
-                console.error('Erreur webhook:', error);
+                console.error('=== ERREUR WEBHOOK ===');
+                console.error('Erreur complète:', error);
                 hideTypingIndicator();
                 updateConnectionStatus('Erreur de connexion', 'disconnected');
                 
-                addMessage('assistant', '⚠️ Désolé, je ne peux pas répondre en ce moment. Veuillez réessayer plus tard.');
+                addMessage('assistant', `⚠️ Erreur de connexion: ${error.message}`);
+                
+                addDebugInfo({
+                    url: WEBHOOK_URL,
+                    status: 'error',
+                    error: error.message,
+                    stack: error.stack
+                });
             });
         }
 
