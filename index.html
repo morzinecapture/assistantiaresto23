@@ -672,13 +672,8 @@
                 
                 addMessage('assistant', `⚠️ Erreur de connexion: ${error.message}`);
                 
-                addDebugInfo({
-                    url: WEBHOOK_URL,
-                    status: 'error',
-                    error: error.message,
-                    stack: error.stack
-                });
-            });
+                
+            
         }
 
         function addMessage(sender, text, image = null) {
