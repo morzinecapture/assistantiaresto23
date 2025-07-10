@@ -715,17 +715,7 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        function addDebugInfo(data) {
-            const debugDiv = document.createElement('div');
-            debugDiv.className = 'debug-info';
-            debugDiv.innerHTML = `
-                <strong>Debug - Réponse du serveur:</strong><br>
-                <pre>${JSON.stringify(data, null, 2)}</pre>
-            `;
-            chatMessages.appendChild(debugDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
+        
         function showTypingIndicator() {
             typingIndicator.style.display = 'block';
             chatMessages.scrollTop = chatMessages.scrollHeight;
