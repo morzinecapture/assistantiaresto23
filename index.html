@@ -659,32 +659,7 @@
             connectionStatus.className = `connection-status ${status}`;
         }
 
-        // Simulation pour demo (à supprimer en production)
-        if (WEBHOOK_URL.includes('votre-webhook-url')) {
-            // Simulation de réponse pour la démo
-            const originalSendToWebhook = sendToWebhook;
-            sendToWebhook = function(messageData) {
-                showTypingIndicator();
-                updateConnectionStatus('Traitement...', 'disconnected');
-                
-                setTimeout(() => {
-                    hideTypingIndicator();
-                    updateConnectionStatus('Connecté', 'connected');
-                    
-                    // Réponse simulée
-                    let response = '';
-                    if (messageData.type === 'image') {
-                        response = '📸 J\'ai bien reçu votre image ! Je l\'analyse... Cette facture concerne Metro Cash & Carry pour un montant de 245.80€. Voulez-vous que je l\'enregistre ?';
-                    } else if (messageData.type === 'audio') {
-                        response = '🎤 Message vocal reçu et transcrit : "Bonjour, quels sont les horaires de Paul demain ?" Paul travaille demain de 9h à 17h.';
-                    } else {
-                        response = `✅ J'ai bien reçu votre message : "${messageData.text}". Comment puis-je vous aider avec cela ?`;
-                    }
-                    
-                    addMessage('assistant', response);
-                }, 1500);
-            };
-        }
+        
     </script>
 </body>
 </html>
