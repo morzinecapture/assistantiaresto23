@@ -296,6 +296,16 @@
             justify-content: center;
         }
 
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: #666;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -484,7 +494,7 @@
             // Préparer les données pour le webhook
             const messageData = {
                 text: text,
-                image: selectedImage ? selectedImage.split(',')[1] : null, // Base64 sans préfixe
+                image: selectedImage ? selectedImage.split(',')[1] : null,
                 timestamp: new Date().toISOString(),
                 type: selectedImage ? 'image' : 'text'
             };
@@ -584,6 +594,8 @@
             showTypingIndicator();
             updateConnectionStatus('Envoi en cours...', 'disconnected');
 
+            console.log('Envoi des données:', messageData);
+
             fetch(WEBHOOK_URL, {
                 method: 'POST',
                 headers: {
@@ -591,22 +603,43 @@
                 },
                 body: JSON.stringify(messageData)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Statut de la réponse:', response.status);
+                return response.text(); // Utiliser text() au lieu de json()
+            })
             .then(data => {
+                console.log('Réponse reçue:', data);
                 hideTypingIndicator();
                 updateConnectionStatus('Connecté', 'connected');
                 
-                // Afficher la réponse de l'assistant
-                if (data.response) {
-                    addMessage('assistant', data.response);
+                // Essayer de parser la réponse en JSON
+                let responseData;
+                try {
+                    responseData = JSON.parse(data);
+                } catch (e) {
+                    console.log('Réponse n\'est pas JSON, utilisation directe:', data);
+                    responseData = { response: data };
                 }
+                
+                // Afficher la réponse de l'assistant
+                if (responseData && responseData.response) {
+                    addMessage('assistant', responseData.response);
+                } else if (responseData && typeof responseData === 'string') {
+                    addMessage('assistant', responseData);
+                } else if (data) {
+                    addMessage('assistant', data);
+                } else {
+                    addMessage('assistant', '✅ Message reçu mais pas de réponse du serveur');
+                }
+                
+                // Afficher les informations de debug
+                addDebugInfo(responseData || data);
             })
             .catch(error => {
                 console.error('Erreur webhook:', error);
                 hideTypingIndicator();
                 updateConnectionStatus('Erreur de connexion', 'disconnected');
                 
-                // Message d'erreur simulé
                 addMessage('assistant', '⚠️ Désolé, je ne peux pas répondre en ce moment. Veuillez réessayer plus tard.');
             });
         }
@@ -645,6 +678,17 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
+        function addDebugInfo(data) {
+            const debugDiv = document.createElement('div');
+            debugDiv.className = 'debug-info';
+            debugDiv.innerHTML = `
+                <strong>Debug - Réponse du serveur:</strong><br>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            chatMessages.appendChild(debugDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
         function showTypingIndicator() {
             typingIndicator.style.display = 'block';
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -658,8 +702,6 @@
             connectionStatus.textContent = status === 'connected' ? '🟢 ' + text : '🔴 ' + text;
             connectionStatus.className = `connection-status ${status}`;
         }
-
-        
     </script>
 </body>
 </html>
