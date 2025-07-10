@@ -665,16 +665,16 @@
                 });
             })
             .catch(error => {
-                console.error('=== ERREUR WEBHOOK ===');
-                console.error('Erreur complète:', error);
-                hideTypingIndicator();
-                updateConnectionStatus('Erreur de connexion', 'disconnected');
-                
-                addMessage('assistant', `⚠️ Erreur de connexion: ${error.message}`);
-                
-                
-            
-        }}
+    console.error('=== ERREUR WEBHOOK ===');
+    console.error('Erreur complète:', error);
+    hideTypingIndicator();
+    updateConnectionStatus('Erreur de connexion', 'disconnected');
+    addMessage('assistant', `⚠️ Erreur de connexion: ${error.message}`);
+});
+
+// 👇 AJOUTE CETTE LIGNE ICI :
+}
+
         function addMessage(sender, text, image = null) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
