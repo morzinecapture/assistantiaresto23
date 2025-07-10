@@ -662,15 +662,7 @@
                 addMessage('assistant', responseMessage);
                 
                 // Afficher les informations de debug
-                addDebugInfo({
-                    url: WEBHOOK_URL,
-                    status: 'success',
-                    rawResponse: data,
-                    parsedResponse: responseData,
-                    responseLength: data.length,
-                    isEmpty: !data || data.trim() === '',
-                    finalMessage: responseMessage
-                });
+                
             })
             .catch(error => {
                 console.error('=== ERREUR WEBHOOK ===');
@@ -680,12 +672,7 @@
                 
                 addMessage('assistant', `⚠️ Erreur de connexion: ${error.message}`);
                 
-                addDebugInfo({
-                    url: WEBHOOK_URL,
-                    status: 'error',
-                    error: error.message,
-                    stack: error.stack
-                });
+                
             });
         }
 
