@@ -619,15 +619,7 @@
                 
                 return response.text();
             })
-            .then(data => if (responseData.imageUrl) {
-    // ✅ ➕ AJOUTE CE BLOC :
-    const downloadBtn = document.getElementById('download-platdujour');
-    downloadBtn.href = responseData.imageUrl;
-    downloadBtn.style.display = 'inline-block';
-
-    // Optionnel : ajouter une confirmation message
-    addMessage('assistant', "✅ L'image du plat du jour est prête à être téléchargée !");
-}
+            .then(data => 
                 {
                 console.log('=== DONNÉES BRUTES ===');
                 console.log('Réponse brute:', data);
