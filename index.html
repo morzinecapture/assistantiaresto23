@@ -12,10 +12,12 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             height: 100vh;
-            overflow: auto;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
         }
 
         .chat-container {
@@ -27,6 +29,7 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
         .chat-header {
@@ -35,6 +38,7 @@
             padding: 20px;
             text-align: center;
             box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
         }
 
         .chat-header h1 {
@@ -52,6 +56,7 @@
             overflow-y: auto;
             padding: 20px;
             background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+            -webkit-overflow-scrolling: touch;
         }
 
         .message {
@@ -147,6 +152,8 @@
             padding: 20px;
             border-top: 1px solid #e0e0e0;
             box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+            position: relative;
         }
 
         .input-container {
@@ -173,6 +180,7 @@
             outline: none;
             resize: none;
             transition: border-color 0.3s ease;
+            -webkit-appearance: none;
         }
 
         .message-input:focus {
@@ -203,9 +211,10 @@
             justify-content: center;
             transition: all 0.3s ease;
             font-size: 16px;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .action-btn:hover {
+        .action-btn:hover, .action-btn:active {
             background: #667eea;
             color: white;
             transform: scale(1.1);
@@ -230,9 +239,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .send-btn:hover {
+        .send-btn:hover, .send-btn:active {
             transform: scale(1.1);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
@@ -294,16 +304,25 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .debug-info {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 0.8em;
-            color: #666;
+        #download-platdujour {
+            display: none;
+            margin: 20px 0;
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        #download-platdujour:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
         }
 
         @keyframes fadeIn {
@@ -317,8 +336,12 @@
             100% { transform: scale(1); }
         }
 
-        /* Responsive */
+        /* Mobile optimizations */
         @media (max-width: 768px) {
+            body {
+                font-size: 16px;
+            }
+            
             .chat-container {
                 height: 100vh;
                 border-radius: 0;
@@ -331,25 +354,52 @@
             .chat-input {
                 padding: 15px;
             }
+            
+            .chat-header {
+                padding: 15px;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.5em;
+            }
+            
+            .message-input {
+                font-size: 16px; /* Empêche le zoom sur iOS */
+            }
         }
 
-        /* Scrollbar personnalisée */
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
+        /* iOS Safari specific fixes */
+        @supports (-webkit-appearance: none) {
+            .chat-container {
+                height: 100vh;
+                height: -webkit-fill-available;
+            }
+            
+            .message-input {
+                -webkit-appearance: none;
+                border-radius: 25px;
+            }
         }
 
-        .chat-messages::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
+        /* Scrollbar personnalisée pour desktop */
+        @media (hover: hover) {
+            .chat-messages::-webkit-scrollbar {
+                width: 6px;
+            }
 
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 10px;
-        }
+            .chat-messages::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
 
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: #5a67d8;
+            .chat-messages::-webkit-scrollbar-thumb {
+                background: #667eea;
+                border-radius: 10px;
+            }
+
+            .chat-messages::-webkit-scrollbar-thumb:hover {
+                background: #5a67d8;
+            }
         }
     </style>
 </head>
@@ -362,9 +412,10 @@
         </div>
 
         <div class="chat-messages" id="chatMessages">
-            <a id="download-platdujour" href="" download="plat.png" style="display:none;margin:20px 0; font-size:18px; color:#1666af;">
-  📥 Télécharger l'image du plat du jour
-</a>            <div class="message assistant">
+            <a id="download-platdujour" href="" download="plat.png">
+                📥 Télécharger l'image du plat du jour
+            </a>
+            <div class="message assistant">
                 <div class="message-bubble">
                     👋 Bonjour ! Je suis votre assistant restaurant IA. Comment puis-je vous aider aujourd'hui ?
                     <br><br>
@@ -423,7 +474,7 @@
 
     <script>
         // Configuration
-        const WEBHOOK_URL = 'https://morzinecap.app.n8n.cloud/webhook/23ed6cad-a469-446c-bccd-fe294d0f1839'
+        const WEBHOOK_URL = 'https://morzinecap.app.n8n.cloud/webhook/23ed6cad-a469-446c-bccd-fe294d0f1839';
         
         // Variables globales
         let isRecording = false;
@@ -448,6 +499,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
             adjustTextareaHeight();
+            
+            // Fix pour iOS Safari
+            if (window.navigator.userAgent.includes('Safari') && !window.navigator.userAgent.includes('Chrome')) {
+                document.body.style.height = '100vh';
+                document.body.style.height = '-webkit-fill-available';
+            }
         });
 
         function setupEventListeners() {
@@ -619,8 +676,7 @@
                 
                 return response.text();
             })
-            .then(data => 
-                {
+            .then(data => {
                 console.log('=== DONNÉES BRUTES ===');
                 console.log('Réponse brute:', data);
                 console.log('Type:', typeof data);
@@ -664,8 +720,14 @@
                 // Afficher la réponse
                 addMessage('assistant', responseMessage);
                 
-                // Afficher les informations de debug
-                
+                // Gérer le bouton de téléchargement
+                if (responseData && responseData.imageUrl) {
+                    const downloadBtn = document.getElementById('download-platdujour');
+                    downloadBtn.href = responseData.imageUrl;
+                    downloadBtn.style.display = 'inline-block';
+                    
+                    addMessage('assistant', "✅ L'image du plat du jour est prête à être téléchargée !");
+                }
             })
             .catch(error => {
                 console.error('=== ERREUR WEBHOOK ===');
@@ -674,8 +736,6 @@
                 updateConnectionStatus('Erreur de connexion', 'disconnected');
                 
                 addMessage('assistant', `⚠️ Erreur de connexion: ${error.message}`);
-                
-                
             });
         }
 
@@ -713,8 +773,6 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-    
-
         function showTypingIndicator() {
             typingIndicator.style.display = 'block';
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -728,7 +786,6 @@
             connectionStatus.textContent = status === 'connected' ? '🟢 ' + text : '🔴 ' + text;
             connectionStatus.className = `connection-status ${status}`;
         }
-
-</script>
+    </script>
 </body>
 </html>
